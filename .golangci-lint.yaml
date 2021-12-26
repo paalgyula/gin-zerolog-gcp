@@ -1,0 +1,26 @@
+output:
+  format: colored-line-number
+run:
+  allow-parallel-runners: true
+  tests: false
+  timeout: 6m
+  issue-exit-code: 1
+  skip-dirs:
+    - vendor
+linters:
+  enable-all: true
+  disable-all: false
+  disable:
+    - gomnd
+    - exhaustive
+    - exhaustivestruct
+    - scopelint
+    - maligned
+    - interfacer
+    - dupl
+    - gochecknoinits
+    - gocyclo
+    - gofmt
+    - golint
+    - lll
+    - gomoddirectives
