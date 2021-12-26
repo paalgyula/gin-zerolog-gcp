@@ -14,7 +14,9 @@ import (
 // Not all fields are currently provided.
 // https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry#HttpRequest
 const (
-	FieldNameRequest          = "httpRequest"
+	JsonPayloadKey = "jsonPayload"
+	HttpRequestKey = "httpRequest"
+
 	FieldNameRequestMethod    = "requestMethod"
 	FieldNameRequestURL       = "requestUrl"
 	FieldNameRequestProtocol  = "protocol"
@@ -22,10 +24,12 @@ const (
 	FieldNameResponseSize     = "responseSize"
 	FieldNameResponseStatus   = "status"
 	FieldNameLatency          = "latency"
+
+	payloadContextKey = "jsonLogPayload"
 )
 
-func Logger(c *gin.Context) zerolog.Logger {
-	return c.MustGet("logger").(zerolog.Logger)
+func Logger(c *gin.Context) zerolog.Event {
+	return c.MustGet(payloadContextKey).(zerolog.Event)
 }
 
 func WithAccessLog() gin.HandlerFunc {
@@ -36,7 +40,9 @@ func WithAccessLog() gin.HandlerFunc {
 
 		// Set logger in context.
 		logger := logContextRoot.Logger()
-		ctx.Set("logger", logger)
+
+		// Adding dictionary to gin's context
+		ctx.Set(payloadContextKey, zerolog.Dict())
 
 		ctx.Next()
 
@@ -60,7 +66,11 @@ func WithAccessLog() gin.HandlerFunc {
 		rd = rd.Str(FieldNameLatency, fmt.Sprintf("%dms", time.Since(start).Milliseconds()))
 		rd = rd.Str(FieldNameRequestProtocol, r.Proto)
 
+		payload := ctx.MustGet(payloadContextKey).(*zerolog.Event)
+
 		// Log access.
-		e.Dict(FieldNameRequest, rd).Msgf("Served HTTP request: %s", r.URL.String())
+		e.Dict(HttpRequestKey, rd).
+			Dict(JsonPayloadKey, payload).
+			Msgf("Served HTTP request: %s", r.URL.String())
 	}
 }

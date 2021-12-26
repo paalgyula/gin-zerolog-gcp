@@ -7,12 +7,17 @@ Sample usage with gin:
 `go get github.com/paalgyula/gin-zerolog-gcp`
 
 ```go
-    import gcp "github.com/paalgyula/gin-zerolog-gcp"
+import gcp "github.com/paalgyula/gin-zerolog-gcp"
 
-    ...
+...
 
 func main() {
-    gke.SetupLogger(os.GetEnv("DEBUG") != "")
+    switch {
+        case os.GetEnv("DEBUG") != "":
+            gke.SetupLogger(false)
+        default:
+            gke.SetupLogger()
+    }
 
     api := gin.New()
 
