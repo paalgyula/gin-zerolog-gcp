@@ -28,8 +28,8 @@ const (
 	payloadContextKey = "jsonLogPayload"
 )
 
-func Logger(c *gin.Context) zerolog.Event {
-	return c.MustGet(payloadContextKey).(zerolog.Event)
+func Logger(c *gin.Context) *zerolog.Event {
+	return c.MustGet(payloadContextKey).(*zerolog.Event)
 }
 
 func WithAccessLog() gin.HandlerFunc {
